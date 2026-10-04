@@ -1,30 +1,17 @@
 package com.dronecontrol.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.PanTool
-import androidx.compose.material.icons.filled.RotateLeft
-import androidx.compose.material.icons.filled.RotateRight
-import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,31 +27,27 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dronecontrol.ui.theme.GcsCardBorder
-import com.dronecontrol.ui.theme.GcsCyan
-import com.dronecontrol.ui.theme.GcsEmerald
-import com.dronecontrol.ui.theme.GcsTextMuted
-import com.dronecontrol.ui.theme.GcsTextPrimary
+import com.dronecontrol.ui.theme.GcsTheme
 
 /**
- * Tactical D-Pad button controller that replaces difficult analog joysticks.
- * Uses press-and-hold gestures: the drone moves while the button is pressed,
- * and immediately auto-brakes to a rock-solid hover the moment the finger is released.
+ * Modern borderless tactile D-Pad controller for simple, stable drone operations.
+ * - Clean borderless buttons (no weird borders).
+ * - Icons only inside buttons (no text clutter).
+ * - Press-and-hold activation with automatic hover braking upon finger release.
  */
 @Composable
 fun DirectionalButtonPad(
     title: String,
     accentColor: Color,
-    upLabel: String,
     upIcon: ImageVector,
-    downLabel: String,
     downIcon: ImageVector,
-    leftLabel: String,
     leftIcon: ImageVector,
-    rightLabel: String,
     rightIcon: ImageVector,
+    padSize: Dp = 160.dp,
+    buttonSize: Dp = 48.dp,
     centerLabel: String = "BRAKE",
     onUpPressed: (Boolean) -> Unit,
     onDownPressed: (Boolean) -> Unit,
@@ -73,99 +56,104 @@ fun DirectionalButtonPad(
     onCenterClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val colors = GcsTheme.colors
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
-        Text(
-            text = title,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Monospace,
-            color = GcsTextMuted
-        )
-        Spacer(modifier = Modifier.height(8.dp))
+        if (title.isNotEmpty()) {
+            Text(
+                text = title,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace,
+                color = colors.textMuted
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+        }
 
-        // D-Pad Cross Layout
+        // D-Pad Cross Layout with subtle circular backdrop (no hard borders)
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(170.dp)
+                .size(padSize)
                 .clip(CircleShape)
-                .background(Color(0xFF0F1626))
-                .border(1.5.dp, GcsCardBorder, CircleShape)
+                .background(
+                    if (colors.isDark) Color(0xFF141B2D) else Color(0xFFE2E8F0).copy(alpha = 0.7f)
+                )
         ) {
             // TOP BUTTON (UP / FORWARD / CLIMB)
-            PadButton(
+            BorderlessPadButton(
                 icon = upIcon,
-                label = upLabel,
                 color = accentColor,
+                buttonSize = buttonSize,
                 onStateChanged = onUpPressed,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .padding(top = 8.dp)
+                    .padding(top = 4.dp)
             )
 
             // BOTTOM BUTTON (DOWN / BACKWARD / DESCEND)
-            PadButton(
+            BorderlessPadButton(
                 icon = downIcon,
-                label = downLabel,
                 color = accentColor,
+                buttonSize = buttonSize,
                 onStateChanged = onDownPressed,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 8.dp)
+                    .padding(bottom = 4.dp)
             )
 
             // LEFT BUTTON (LEFT / YAW CCW / ROLL LEFT)
-            PadButton(
+            BorderlessPadButton(
                 icon = leftIcon,
-                label = leftLabel,
                 color = accentColor,
+                buttonSize = buttonSize,
                 onStateChanged = onLeftPressed,
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .padding(start = 8.dp)
+                    .padding(start = 4.dp)
             )
 
             // RIGHT BUTTON (RIGHT / YAW CW / ROLL RIGHT)
-            PadButton(
+            BorderlessPadButton(
                 icon = rightIcon,
-                label = rightLabel,
                 color = accentColor,
+                buttonSize = buttonSize,
                 onStateChanged = onRightPressed,
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
-                    .padding(end = 8.dp)
+                    .padding(end = 4.dp)
             )
 
             // CENTER BUTTON (HOVER / BRAKE / LOCK)
+            val centerSize = (buttonSize.value * 0.95f).dp
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(46.dp)
+                    .size(centerSize)
                     .clip(CircleShape)
-                    .background(Color(0xFF1E293B))
-                    .border(1.5.dp, accentColor.copy(alpha = 0.6f), CircleShape)
+                    .background(
+                        if (colors.isDark) Color(0xFF1E293B) else Color(0xFFCBD5E1)
+                    )
                     .pointerInput(Unit) {
-                        detectTapGestures(
-                            onTap = { onCenterClick() }
-                        )
+                        detectTapGestures(onTap = { onCenterClick() })
                     }
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
                         imageVector = Icons.Default.PanTool,
-                        contentDescription = null,
+                        contentDescription = centerLabel,
                         tint = accentColor,
-                        modifier = Modifier.size(14.dp)
+                        modifier = Modifier.size((buttonSize.value * 0.38f).dp)
                     )
                     Text(
                         text = centerLabel,
-                        fontSize = 7.sp,
+                        fontSize = if (buttonSize > 55.dp) 9.sp else 7.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
-                        color = GcsTextPrimary
+                        color = colors.textPrimary
                     )
                 }
             }
@@ -174,29 +162,28 @@ fun DirectionalButtonPad(
 }
 
 /**
- * Individual tactile direction button with press-and-hold reactive feedback.
+ * Clean, borderless touch button with smooth rounded feedback.
  */
 @Composable
-fun PadButton(
+fun BorderlessPadButton(
     icon: ImageVector,
-    label: String,
     color: Color,
+    buttonSize: Dp = 48.dp,
     onStateChanged: (isPressed: Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = GcsTheme.colors
     var isPressed by remember { mutableStateOf(false) }
+
+    val defaultBg = if (colors.isDark) Color(0xFF1E2738) else Color(0xFFF1F5F9)
+    val activeBg = color.copy(alpha = if (colors.isDark) 0.40f else 0.25f)
 
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .size(width = 50.dp, height = 44.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(if (isPressed) color.copy(alpha = 0.35f) else Color(0xFF162032))
-            .border(
-                1.dp,
-                if (isPressed) color else GcsCardBorder,
-                RoundedCornerShape(8.dp)
-            )
+            .size(buttonSize)
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (isPressed) activeBg else defaultBg)
             .pointerInput(Unit) {
                 detectTapGestures(
                     onPress = {
@@ -209,23 +196,11 @@ fun PadButton(
                 )
             }
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = if (isPressed) color else GcsTextPrimary,
-                modifier = Modifier.size(18.dp)
-            )
-            Text(
-                text = label,
-                fontSize = 8.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Monospace,
-                color = if (isPressed) color else GcsTextMuted
-            )
-        }
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = if (isPressed) color else (if (colors.isDark) colors.textPrimary else colors.textSecondary),
+            modifier = Modifier.size((buttonSize.value * 0.52f).dp)
+        )
     }
 }

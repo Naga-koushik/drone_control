@@ -28,14 +28,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dronecontrol.ui.screens.ConnectionScreen
 import com.dronecontrol.ui.screens.DashboardScreen
+import com.dronecontrol.ui.screens.FlightCockpitScreen
 import com.dronecontrol.ui.screens.MapScreen
 import com.dronecontrol.ui.screens.SettingsScreen
 import com.dronecontrol.ui.screens.TelemetryScreen
-import com.dronecontrol.ui.theme.GcsCardBackground
-import com.dronecontrol.ui.theme.GcsCardBorder
-import com.dronecontrol.ui.theme.GcsCyan
-import com.dronecontrol.ui.theme.GcsDarkBackground
-import com.dronecontrol.ui.theme.GcsTextMuted
+import com.dronecontrol.ui.theme.GcsTheme
 import com.dronecontrol.viewmodel.DroneViewModel
 
 @Composable
@@ -43,18 +40,30 @@ fun AppNavigation(
     viewModel: DroneViewModel,
     modifier: Modifier = Modifier
 ) {
-    val navController = rememberNavController()
     val uiState by viewModel.uiState.collectAsState()
+    val colors = GcsTheme.colors
+
+    // If dedicated Flight Cockpit is opened, present fullscreen landscape cockpit
+    if (uiState.isCockpitOpen) {
+        FlightCockpitScreen(
+            uiState = uiState,
+            viewModel = viewModel,
+            onCloseCockpit = { viewModel.closeCockpit() }
+        )
+        return
+    }
+
+    val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = GcsDarkBackground,
+        containerColor = colors.background,
         bottomBar = {
             NavigationBar(
-                containerColor = GcsCardBackground,
-                modifier = Modifier.border(width = 1.dp, color = GcsCardBorder)
+                containerColor = colors.cardBackground,
+                modifier = Modifier.border(width = 1.dp, color = colors.cardBorder)
             ) {
                 Screen.items.forEach { screen ->
                     val isSelected = currentRoute == screen.route
@@ -87,11 +96,11 @@ fun AppNavigation(
                             }
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = GcsCyan,
-                            selectedTextColor = GcsCyan,
-                            unselectedIconColor = GcsTextMuted,
-                            unselectedTextColor = GcsTextMuted,
-                            indicatorColor = GcsCyan.copy(alpha = 0.15f)
+                            selectedIconColor = colors.primary,
+                            selectedTextColor = colors.primary,
+                            unselectedIconColor = colors.textMuted,
+                            unselectedTextColor = colors.textMuted,
+                            indicatorColor = colors.primary.copy(alpha = if (colors.isDark) 0.20f else 0.12f)
                         )
                     )
                 }
@@ -121,7 +130,7 @@ fun AppNavigation(
                     MapScreen(uiState = uiState)
                 }
                 composable(Screen.Settings.route) {
-                    SettingsScreen(uiState = uiState)
+                    SettingsScreen(uiState = uiState, viewModel = viewModel)
                 }
             }
         }

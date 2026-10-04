@@ -47,15 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dronecontrol.ui.components.SimulationBadge
-import com.dronecontrol.ui.theme.GcsCardBackground
-import com.dronecontrol.ui.theme.GcsCardBorder
-import com.dronecontrol.ui.theme.GcsCrimson
-import com.dronecontrol.ui.theme.GcsCyan
-import com.dronecontrol.ui.theme.GcsDarkBackground
-import com.dronecontrol.ui.theme.GcsEmerald
-import com.dronecontrol.ui.theme.GcsTextMuted
-import com.dronecontrol.ui.theme.GcsTextPrimary
-import com.dronecontrol.ui.theme.GcsTextSecondary
+import com.dronecontrol.ui.theme.GcsTheme
 import com.dronecontrol.utils.Formatters
 import com.dronecontrol.viewmodel.DroneUiState
 
@@ -67,6 +59,7 @@ fun MapScreen(
     modifier: Modifier = Modifier
 ) {
     val telemetry = uiState.telemetry
+    val colors = GcsTheme.colors
     val homeLat = 37.774929
     val homeLon = -122.419416
 
@@ -86,7 +79,7 @@ fun MapScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(GcsDarkBackground)
+            .background(colors.background)
     ) {
         // 1. Tactical Radar / Map Canvas
         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -94,9 +87,9 @@ fun MapScreen(
 
             // Draw radar range rings (e.g. 50m, 100m, 200m)
             val ringRadii = listOf(80f * zoomLevel, 160f * zoomLevel, 260f * zoomLevel, 380f * zoomLevel)
-            ringRadii.forEachIndexed { idx, radius ->
+            ringRadii.forEach { radius ->
                 drawCircle(
-                    color = GcsCardBorder.copy(alpha = 0.5f),
+                    color = colors.cardBorder.copy(alpha = 0.6f),
                     radius = radius,
                     center = center,
                     style = Stroke(width = 1.dp.toPx())
@@ -105,27 +98,26 @@ fun MapScreen(
 
             // Radar cardinal cross lines
             drawLine(
-                color = GcsCardBorder.copy(alpha = 0.3f),
+                color = colors.cardBorder.copy(alpha = 0.4f),
                 start = Offset(center.x, 0f),
                 end = Offset(center.x, size.height),
                 strokeWidth = 1.dp.toPx()
             )
             drawLine(
-                color = GcsCardBorder.copy(alpha = 0.3f),
+                color = colors.cardBorder.copy(alpha = 0.4f),
                 start = Offset(0f, center.y),
                 end = Offset(size.width, center.y),
                 strokeWidth = 1.dp.toPx()
             )
 
             // Convert Lat/Lon offsets into screen pixels relative to Home
-            // 1 meter ≈ 2.5 * zoomLevel pixels
             val scale = 2.5f * zoomLevel
             val metersPerDegLat = 111132.95
             val metersPerDegLon = 111132.95 * Math.cos(homeLat * Math.PI / 180.0)
 
             // Draw Home Marker (Takeoff location)
             drawCircle(
-                color = Color(0xFF818CF8),
+                color = colors.secondary,
                 radius = 7.dp.toPx(),
                 center = center
             )
@@ -148,7 +140,7 @@ fun MapScreen(
                 }
                 drawPath(
                     path = trailPath,
-                    color = GcsCyan.copy(alpha = 0.6f),
+                    color = colors.primary.copy(alpha = 0.6f),
                     style = Stroke(width = 2.dp.toPx())
                 )
             }
@@ -168,7 +160,7 @@ fun MapScreen(
                 (droneY - projLen * Math.cos(headingRad)).toFloat()
             )
             drawLine(
-                color = GcsCyan,
+                color = colors.primary,
                 start = dronePos,
                 end = projEnd,
                 strokeWidth = 2.dp.toPx()
@@ -185,7 +177,7 @@ fun MapScreen(
                 }
                 drawPath(
                     path = triPath,
-                    color = if (telemetry.isArmed) GcsCrimson else GcsEmerald
+                    color = if (telemetry.isArmed) colors.error else colors.success
                 )
                 drawPath(
                     path = triPath,
@@ -205,8 +197,8 @@ fun MapScreen(
         ) {
             Card(
                 shape = RoundedCornerShape(8.dp),
-                colors = CardDefaults.cardColors(containerColor = GcsCardBackground.copy(alpha = 0.9f)),
-                modifier = Modifier.border(1.dp, GcsCardBorder, RoundedCornerShape(8.dp))
+                colors = CardDefaults.cardColors(containerColor = colors.cardBackground.copy(alpha = 0.92f)),
+                modifier = Modifier.border(1.dp, colors.cardBorder, RoundedCornerShape(8.dp))
             ) {
                 Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
                     Text(
@@ -214,25 +206,25 @@ fun MapScreen(
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
-                        color = GcsCyan
+                        color = colors.primary
                     )
                     Text(
                         text = "LAT: ${Formatters.formatCoordinate(telemetry.latitude)}",
                         fontSize = 10.sp,
                         fontFamily = FontFamily.Monospace,
-                        color = GcsTextSecondary
+                        color = colors.textSecondary
                     )
                     Text(
                         text = "LON: ${Formatters.formatCoordinate(telemetry.longitude)}",
                         fontSize = 10.sp,
                         fontFamily = FontFamily.Monospace,
-                        color = GcsTextSecondary
+                        color = colors.textSecondary
                     )
                     Text(
                         text = "ALT: ${Formatters.formatAltitude(telemetry.relativeAltitude)} | HDG: ${telemetry.heading.toInt()}°",
                         fontSize = 10.sp,
                         fontFamily = FontFamily.Monospace,
-                        color = GcsTextPrimary
+                        color = colors.textPrimary
                     )
                 }
             }
@@ -270,11 +262,11 @@ fun MapScreen(
         // 4. Bottom Legend Card
         Card(
             shape = RoundedCornerShape(8.dp),
-            colors = CardDefaults.cardColors(containerColor = GcsCardBackground.copy(alpha = 0.9f)),
+            colors = CardDefaults.cardColors(containerColor = colors.cardBackground.copy(alpha = 0.92f)),
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(16.dp)
-                .border(1.dp, GcsCardBorder, RoundedCornerShape(8.dp))
+                .border(1.dp, colors.cardBorder, RoundedCornerShape(8.dp))
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
@@ -285,21 +277,21 @@ fun MapScreen(
                     modifier = Modifier
                         .size(8.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFF818CF8))
+                        .background(colors.secondary)
                 )
-                Text("HOME", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = GcsTextMuted)
+                Text("HOME", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = colors.textMuted)
 
                 Box(
                     modifier = Modifier
                         .size(8.dp)
                         .clip(CircleShape)
-                        .background(if (telemetry.isArmed) GcsCrimson else GcsEmerald)
+                        .background(if (telemetry.isArmed) colors.error else colors.success)
                 )
                 Text(
                     if (telemetry.isArmed) "UAV ARMED" else "UAV SAFE",
                     fontSize = 10.sp,
                     fontFamily = FontFamily.Monospace,
-                    color = GcsTextMuted
+                    color = colors.textMuted
                 )
             }
         }
@@ -311,18 +303,19 @@ fun MapControlFab(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     onClick: () -> Unit
 ) {
+    val colors = GcsTheme.colors
     IconButton(
         onClick = onClick,
         modifier = Modifier
             .size(42.dp)
             .clip(CircleShape)
-            .background(GcsCardBackground.copy(alpha = 0.9f))
-            .border(1.dp, GcsCardBorder, CircleShape)
+            .background(colors.cardBackground.copy(alpha = 0.92f))
+            .border(1.dp, colors.cardBorder, CircleShape)
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = GcsCyan,
+            tint = colors.primary,
             modifier = Modifier.size(20.dp)
         )
     }

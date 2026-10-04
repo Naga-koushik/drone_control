@@ -3,7 +3,6 @@ package com.dronecontrol.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,18 +36,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dronecontrol.data.Telemetry
 import com.dronecontrol.ui.components.SimulationBadge
-import com.dronecontrol.ui.theme.GcsAmber
-import com.dronecontrol.ui.theme.GcsCardBackground
-import com.dronecontrol.ui.theme.GcsCardBorder
-import com.dronecontrol.ui.theme.GcsCrimson
-import com.dronecontrol.ui.theme.GcsCyan
-import com.dronecontrol.ui.theme.GcsDarkBackground
-import com.dronecontrol.ui.theme.GcsEmerald
-import com.dronecontrol.ui.theme.GcsTextMuted
-import com.dronecontrol.ui.theme.GcsTextPrimary
-import com.dronecontrol.ui.theme.GcsTextSecondary
+import com.dronecontrol.ui.theme.GcsTheme
 import com.dronecontrol.utils.Formatters
 import com.dronecontrol.viewmodel.DroneUiState
 import java.text.SimpleDateFormat
@@ -61,11 +50,12 @@ fun TelemetryScreen(
     modifier: Modifier = Modifier
 ) {
     val telemetry = uiState.telemetry
+    val colors = GcsTheme.colors
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(GcsDarkBackground)
+            .background(colors.background)
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
@@ -82,12 +72,12 @@ fun TelemetryScreen(
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
                     letterSpacing = 1.sp,
-                    color = GcsTextPrimary
+                    color = colors.textPrimary
                 )
                 Text(
                     text = "Real-time stream from flight controller sensors",
                     fontSize = 12.sp,
-                    color = GcsTextMuted
+                    color = colors.textMuted
                 )
             }
             if (uiState.isSimulation) {
@@ -101,7 +91,7 @@ fun TelemetryScreen(
         TelemetrySectionCard(
             title = "POWER & ELECTRICAL SUBSYSTEM",
             icon = Icons.Default.BatteryChargingFull,
-            accentColor = if (telemetry.batteryPercentage > 30) GcsEmerald else GcsCrimson
+            accentColor = if (telemetry.batteryPercentage > 30) colors.success else colors.error
         ) {
             val battProgress = (telemetry.batteryPercentage / 100f).coerceIn(0f, 1f)
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -110,13 +100,13 @@ fun TelemetryScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Battery State of Charge", fontSize = 12.sp, color = GcsTextSecondary)
+                    Text("Battery State of Charge", fontSize = 12.sp, color = colors.textSecondary)
                     Text(
                         "${telemetry.batteryPercentage}%",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
-                        color = if (telemetry.batteryPercentage > 20) GcsEmerald else GcsCrimson
+                        color = if (telemetry.batteryPercentage > 20) colors.success else colors.error
                     )
                 }
                 Spacer(modifier = Modifier.height(6.dp))
@@ -126,8 +116,8 @@ fun TelemetryScreen(
                         .fillMaxWidth()
                         .height(8.dp)
                         .clip(RoundedCornerShape(4.dp)),
-                    color = if (telemetry.batteryPercentage > 20) GcsEmerald else GcsCrimson,
-                    trackColor = Color(0xFF1E293B),
+                    color = if (telemetry.batteryPercentage > 20) colors.success else colors.error,
+                    trackColor = colors.surfaceVariant,
                     strokeCap = StrokeCap.Round
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -143,7 +133,7 @@ fun TelemetryScreen(
         TelemetrySectionCard(
             title = "GPS & SPATIAL NAVIGATION",
             icon = Icons.Default.GpsFixed,
-            accentColor = GcsCyan
+            accentColor = colors.primary
         ) {
             TelemetryDataRow("GPS Fix Status", telemetry.gpsFix.label)
             TelemetryDataRow("Satellites Locked", "${telemetry.satelliteCount} SATS")
@@ -160,7 +150,7 @@ fun TelemetryScreen(
         TelemetrySectionCard(
             title = "FLIGHT DYNAMICS & ATTITUDE",
             icon = Icons.Default.Navigation,
-            accentColor = Color(0xFF818CF8)
+            accentColor = colors.secondary
         ) {
             TelemetryDataRow("Heading (Compass)", "${Formatters.formatHeading(telemetry.heading)} (${Formatters.getCardinalDirection(telemetry.heading)})")
             TelemetryDataRow("Ground Speed", Formatters.formatSpeed(telemetry.groundSpeed))
@@ -176,7 +166,7 @@ fun TelemetryScreen(
         TelemetrySectionCard(
             title = "AUTOPILOT & SAFETIES",
             icon = Icons.Default.Security,
-            accentColor = GcsAmber
+            accentColor = colors.warning
         ) {
             TelemetryDataRow("Active Flight Mode", telemetry.flightMode.displayName)
             TelemetryDataRow("Propulsion Arm State", if (telemetry.isArmed) "ARMED (LIVE)" else "DISARMED (SAFE)")
@@ -195,12 +185,13 @@ fun TelemetrySectionCard(
     accentColor: Color,
     content: @Composable () -> Unit
 ) {
+    val colors = GcsTheme.colors
     Card(
         shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(containerColor = GcsCardBackground),
+        colors = CardDefaults.cardColors(containerColor = colors.cardBackground),
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, GcsCardBorder, RoundedCornerShape(10.dp))
+            .border(1.dp, colors.cardBorder, RoundedCornerShape(10.dp))
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Row(
@@ -230,6 +221,7 @@ fun TelemetrySectionCard(
 
 @Composable
 fun TelemetryDataRow(label: String, value: String) {
+    val colors = GcsTheme.colors
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -240,14 +232,14 @@ fun TelemetryDataRow(label: String, value: String) {
         Text(
             text = label,
             fontSize = 12.sp,
-            color = GcsTextSecondary
+            color = colors.textSecondary
         )
         Text(
             text = value,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.Monospace,
-            color = GcsTextPrimary
+            color = colors.textPrimary
         )
     }
 }

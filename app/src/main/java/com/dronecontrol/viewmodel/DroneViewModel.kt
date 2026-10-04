@@ -245,6 +245,18 @@ class DroneViewModel(
         }
     }
 
+    fun setDarkMode(isDark: Boolean) {
+        _uiState.update { it.copy(isDarkMode = isDark) }
+    }
+
+    fun openCockpit() {
+        _uiState.update { it.copy(isCockpitOpen = true) }
+    }
+
+    fun closeCockpit() {
+        _uiState.update { it.copy(isCockpitOpen = false) }
+    }
+
     fun clearSnackbar() {
         _uiState.update { it.copy(snackbarMessage = null) }
     }

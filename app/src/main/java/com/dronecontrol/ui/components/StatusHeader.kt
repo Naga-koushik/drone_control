@@ -42,15 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dronecontrol.data.ConnectionState
 import com.dronecontrol.data.Telemetry
-import com.dronecontrol.ui.theme.GcsAmber
-import com.dronecontrol.ui.theme.GcsCardBackground
-import com.dronecontrol.ui.theme.GcsCardBorder
-import com.dronecontrol.ui.theme.GcsCrimson
-import com.dronecontrol.ui.theme.GcsCyan
-import com.dronecontrol.ui.theme.GcsEmerald
-import com.dronecontrol.ui.theme.GcsTextMuted
-import com.dronecontrol.ui.theme.GcsTextPrimary
-import com.dronecontrol.ui.theme.GcsTextSecondary
+import com.dronecontrol.ui.theme.GcsTheme
 import com.dronecontrol.utils.Formatters
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -62,11 +54,13 @@ fun StatusHeader(
     onModeClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val colors = GcsTheme.colors
+
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(GcsCardBackground)
-            .border(width = 1.dp, color = GcsCardBorder)
+            .background(colors.cardBackground)
+            .border(width = 1.dp, color = colors.cardBorder)
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         // Top row: App title & SIMULATION MODE alert badge
@@ -79,7 +73,7 @@ fun StatusHeader(
                 Icon(
                     imageVector = Icons.Default.Flight,
                     contentDescription = null,
-                    tint = GcsCyan,
+                    tint = colors.primary,
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
@@ -88,7 +82,7 @@ fun StatusHeader(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp,
-                    color = GcsTextPrimary
+                    color = colors.textPrimary
                 )
             }
 
@@ -107,9 +101,9 @@ fun StatusHeader(
         ) {
             // Connection Chip
             val connColor = when (connectionState) {
-                ConnectionState.CONNECTED -> GcsEmerald
-                ConnectionState.CONNECTING -> GcsAmber
-                else -> GcsCrimson
+                ConnectionState.CONNECTED -> colors.success
+                ConnectionState.CONNECTING -> colors.warning
+                else -> colors.error
             }
             StatusPill(
                 label = "LINK",
@@ -119,7 +113,7 @@ fun StatusHeader(
             )
 
             // Armed/Disarmed Chip
-            val armColor = if (telemetry.isArmed) GcsCrimson else GcsTextMuted
+            val armColor = if (telemetry.isArmed) colors.error else colors.textMuted
             val armText = if (telemetry.isArmed) "ARMED" else "DISARMED"
             StatusPill(
                 label = "SAFETY",
@@ -132,15 +126,15 @@ fun StatusHeader(
             StatusPill(
                 label = "MODE",
                 value = telemetry.flightMode.displayName,
-                accentColor = GcsCyan,
+                accentColor = colors.primary,
                 modifier = Modifier.clickable { onModeClick() }
             )
 
             // Battery Chip
             val battColor = when {
-                telemetry.batteryPercentage < 20 -> GcsCrimson
-                telemetry.batteryPercentage < 40 -> GcsAmber
-                else -> GcsEmerald
+                telemetry.batteryPercentage < 20 -> colors.error
+                telemetry.batteryPercentage < 40 -> colors.warning
+                else -> colors.success
             }
             StatusPill(
                 label = "BATT",
@@ -153,7 +147,7 @@ fun StatusHeader(
             StatusPill(
                 label = "GPS",
                 value = "${telemetry.gpsFix.label} (${telemetry.satelliteCount} SAT)",
-                accentColor = if (telemetry.satelliteCount >= 8) GcsEmerald else GcsAmber,
+                accentColor = if (telemetry.satelliteCount >= 8) colors.success else colors.warning,
                 icon = Icons.Default.GpsFixed
             )
         }
@@ -162,10 +156,11 @@ fun StatusHeader(
 
 @Composable
 fun SimulationBadge(modifier: Modifier = Modifier) {
+    val colors = GcsTheme.colors
     val infiniteTransition = rememberInfiniteTransition(label = "sim_pulse")
     val pulseColor by infiniteTransition.animateColor(
-        initialValue = GcsAmber,
-        targetValue = GcsAmber.copy(alpha = 0.4f),
+        initialValue = colors.warning,
+        targetValue = colors.warning.copy(alpha = 0.4f),
         animationSpec = infiniteRepeatable(
             animation = tween(800),
             repeatMode = RepeatMode.Reverse
@@ -193,7 +188,7 @@ fun SimulationBadge(modifier: Modifier = Modifier) {
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Monospace,
-                color = GcsAmber,
+                color = colors.warning,
                 letterSpacing = 0.5.sp
             )
         }
@@ -208,10 +203,11 @@ fun StatusPill(
     icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
     modifier: Modifier = Modifier
 ) {
+    val colors = GcsTheme.colors
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(6.dp))
-            .background(Color(0xFF151D2F))
+            .background(colors.surfaceVariant)
             .border(1.dp, accentColor.copy(alpha = 0.4f), RoundedCornerShape(6.dp))
             .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
@@ -232,7 +228,7 @@ fun StatusPill(
                 fontSize = 9.sp,
                 fontWeight = FontWeight.SemiBold,
                 fontFamily = FontFamily.Monospace,
-                color = GcsTextMuted
+                color = colors.textMuted
             )
             Text(
                 text = value,

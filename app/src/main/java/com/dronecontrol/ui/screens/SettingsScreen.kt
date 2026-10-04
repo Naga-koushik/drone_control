@@ -17,9 +17,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.DeveloperBoard
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Memory
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -41,30 +44,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dronecontrol.ui.components.SimulationBadge
-import com.dronecontrol.ui.theme.GcsAmber
-import com.dronecontrol.ui.theme.GcsCardBackground
-import com.dronecontrol.ui.theme.GcsCardBorder
-import com.dronecontrol.ui.theme.GcsCyan
-import com.dronecontrol.ui.theme.GcsDarkBackground
-import com.dronecontrol.ui.theme.GcsEmerald
-import com.dronecontrol.ui.theme.GcsTextMuted
-import com.dronecontrol.ui.theme.GcsTextPrimary
-import com.dronecontrol.ui.theme.GcsTextSecondary
+import com.dronecontrol.ui.theme.GcsTheme
 import com.dronecontrol.viewmodel.DroneUiState
+import com.dronecontrol.viewmodel.DroneViewModel
 
 @Composable
 fun SettingsScreen(
     uiState: DroneUiState,
+    viewModel: DroneViewModel,
     modifier: Modifier = Modifier
 ) {
-    var autoCenterJoysticks by remember { mutableStateOf(true) }
-    var audioAnnouncements by remember { mutableStateOf(true) }
+    val colors = GcsTheme.colors
+    var autoCenterControls by remember { mutableStateOf(true) }
     var metricUnits by remember { mutableStateOf(true) }
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(GcsDarkBackground)
+            .background(colors.background)
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
@@ -81,12 +78,12 @@ fun SettingsScreen(
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
                     letterSpacing = 1.sp,
-                    color = GcsTextPrimary
+                    color = colors.textPrimary
                 )
                 Text(
-                    text = "Control parameters and hardware bridge architecture",
+                    text = "Appearance, control parameters & hardware bridge",
                     fontSize = 12.sp,
-                    color = GcsTextMuted
+                    color = colors.textMuted
                 )
             }
             if (uiState.isSimulation) {
@@ -96,20 +93,91 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 1. Architecture & ESP32 Pipeline Card
+        // 1. APPEARANCE & THEME (DARK / LIGHT MODE)
         Card(
             shape = RoundedCornerShape(10.dp),
-            colors = CardDefaults.cardColors(containerColor = GcsCardBackground),
+            colors = CardDefaults.cardColors(containerColor = colors.cardBackground),
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, GcsCardBorder, RoundedCornerShape(10.dp))
+                .border(1.dp, colors.cardBorder, RoundedCornerShape(10.dp))
+        ) {
+            Column(modifier = Modifier.padding(14.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Palette,
+                        contentDescription = null,
+                        tint = colors.primary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "THEME & APPEARANCE",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        color = colors.primary
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = if (uiState.isDarkMode) Icons.Default.DarkMode else Icons.Default.LightMode,
+                            contentDescription = null,
+                            tint = colors.textPrimary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            Text(
+                                text = if (uiState.isDarkMode) "Dark Cockpit Mode" else "Light Daylight Mode",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = colors.textPrimary
+                            )
+                            Text(
+                                text = if (uiState.isDarkMode) "Titanium dark HUD aesthetic" else "Clean aerospace daytime readability",
+                                fontSize = 11.sp,
+                                color = colors.textMuted
+                            )
+                        }
+                    }
+
+                    Switch(
+                        checked = uiState.isDarkMode,
+                        onCheckedChange = { viewModel.setDarkMode(it) },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = colors.primary,
+                            checkedTrackColor = colors.primary.copy(alpha = 0.35f),
+                            uncheckedThumbColor = colors.textMuted,
+                            uncheckedTrackColor = colors.cardBorder
+                        )
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        // 2. Architecture & ESP32 Pipeline Card
+        Card(
+            shape = RoundedCornerShape(10.dp),
+            colors = CardDefaults.cardColors(containerColor = colors.cardBackground),
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, colors.cardBorder, RoundedCornerShape(10.dp))
         ) {
             Column(modifier = Modifier.padding(14.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.DeveloperBoard,
                         contentDescription = null,
-                        tint = GcsCyan,
+                        tint = colors.primary,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -118,7 +186,7 @@ fun SettingsScreen(
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
-                        color = GcsCyan
+                        color = colors.primary
                     )
                 }
                 Spacer(modifier = Modifier.height(10.dp))
@@ -126,23 +194,23 @@ fun SettingsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(6.dp))
-                        .background(Color(0xFF0C1424))
-                        .border(1.dp, GcsCardBorder, RoundedCornerShape(6.dp))
+                        .background(if (colors.isDark) Color(0xFF0C1424) else Color(0xFFF1F5F9))
+                        .border(1.dp, colors.cardBorder, RoundedCornerShape(6.dp))
                         .padding(10.dp)
                 ) {
                     Text(
                         text = "UI (Compose)\n  ↓\nViewModel (StateFlow)\n  ↓\nDroneRepository\n  ↓\nDroneConnection (MockDroneConnection / ESP32 Bridge)\n  ↓\nTransport (Mock / Wi-Fi UDP / Bluetooth SPP)",
                         fontSize = 11.sp,
                         fontFamily = FontFamily.Monospace,
-                        color = GcsEmerald,
+                        color = colors.success,
                         lineHeight = 16.sp
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "The communication layer is decoupled from the UI. ESP32 Wi-Fi/Bluetooth sockets and MAVLink serializers can be plugged into Transport & DroneConnection without altering Compose components.",
+                    text = "Decoupled hardware layer: Physical ESP32 sockets and MAVLink serializers can be plugged in without changing Compose components.",
                     fontSize = 11.sp,
-                    color = GcsTextSecondary,
+                    color = colors.textSecondary,
                     lineHeight = 15.sp
                 )
             }
@@ -150,20 +218,20 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // 2. Safety & Failsafe Limits Card
+        // 3. Safety & Failsafe Limits Card
         Card(
             shape = RoundedCornerShape(10.dp),
-            colors = CardDefaults.cardColors(containerColor = GcsCardBackground),
+            colors = CardDefaults.cardColors(containerColor = colors.cardBackground),
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, GcsCardBorder, RoundedCornerShape(10.dp))
+                .border(1.dp, colors.cardBorder, RoundedCornerShape(10.dp))
         ) {
             Column(modifier = Modifier.padding(14.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.Security,
                         contentDescription = null,
-                        tint = GcsAmber,
+                        tint = colors.warning,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -172,7 +240,7 @@ fun SettingsScreen(
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
-                        color = GcsAmber
+                        color = colors.warning
                     )
                 }
                 Spacer(modifier = Modifier.height(10.dp))
@@ -186,20 +254,20 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // 3. Joystick & Controls Configuration
+        // 4. Control Preferences Card
         Card(
             shape = RoundedCornerShape(10.dp),
-            colors = CardDefaults.cardColors(containerColor = GcsCardBackground),
+            colors = CardDefaults.cardColors(containerColor = colors.cardBackground),
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, GcsCardBorder, RoundedCornerShape(10.dp))
+                .border(1.dp, colors.cardBorder, RoundedCornerShape(10.dp))
         ) {
             Column(modifier = Modifier.padding(14.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.Memory,
                         contentDescription = null,
-                        tint = Color(0xFF818CF8),
+                        tint = colors.secondary,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -208,7 +276,7 @@ fun SettingsScreen(
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
-                        color = Color(0xFF818CF8)
+                        color = colors.secondary
                     )
                 }
                 Spacer(modifier = Modifier.height(10.dp))
@@ -219,15 +287,15 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text("Auto-Center Joysticks", fontSize = 13.sp, color = GcsTextPrimary)
-                        Text("Return thumb stick to center on release", fontSize = 11.sp, color = GcsTextMuted)
+                        Text("Auto-Braking Hover", fontSize = 13.sp, color = colors.textPrimary)
+                        Text("Instantly stabilizes drone when button is released", fontSize = 11.sp, color = colors.textMuted)
                     }
                     Switch(
-                        checked = autoCenterJoysticks,
-                        onCheckedChange = { autoCenterJoysticks = it },
+                        checked = autoCenterControls,
+                        onCheckedChange = { autoCenterControls = it },
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = GcsCyan,
-                            checkedTrackColor = GcsCyan.copy(alpha = 0.3f)
+                            checkedThumbColor = colors.primary,
+                            checkedTrackColor = colors.primary.copy(alpha = 0.3f)
                         )
                     )
                 }
@@ -240,15 +308,15 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text("Metric Units", fontSize = 13.sp, color = GcsTextPrimary)
-                        Text("Display meters and meters/sec instead of feet", fontSize = 11.sp, color = GcsTextMuted)
+                        Text("Metric Units", fontSize = 13.sp, color = colors.textPrimary)
+                        Text("Display meters and meters/sec instead of feet", fontSize = 11.sp, color = colors.textMuted)
                     }
                     Switch(
                         checked = metricUnits,
                         onCheckedChange = { metricUnits = it },
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = GcsCyan,
-                            checkedTrackColor = GcsCyan.copy(alpha = 0.3f)
+                            checkedThumbColor = colors.primary,
+                            checkedTrackColor = colors.primary.copy(alpha = 0.3f)
                         )
                     )
                 }
@@ -257,20 +325,20 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // 4. About App Card
+        // 5. About Card
         Card(
             shape = RoundedCornerShape(10.dp),
-            colors = CardDefaults.cardColors(containerColor = GcsCardBackground),
+            colors = CardDefaults.cardColors(containerColor = colors.cardBackground),
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, GcsCardBorder, RoundedCornerShape(10.dp))
+                .border(1.dp, colors.cardBorder, RoundedCornerShape(10.dp))
         ) {
             Column(modifier = Modifier.padding(14.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.Info,
                         contentDescription = null,
-                        tint = GcsTextMuted,
+                        tint = colors.textMuted,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -279,14 +347,14 @@ fun SettingsScreen(
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
-                        color = GcsTextMuted
+                        color = colors.textMuted
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 SettingsRow("Application", "DroneControl GCS")
                 SettingsRow("Target Bridge", "ESP32 MAVLink Transceiver")
                 SettingsRow("Version", "1.0.0 (Build 1)")
-                SettingsRow("Architecture", "MVVM + Coroutines Flow")
+                SettingsRow("Architecture", "MVVM + Coroutines StateFlow")
             }
         }
     }
@@ -294,6 +362,7 @@ fun SettingsScreen(
 
 @Composable
 fun SettingsRow(label: String, value: String) {
+    val colors = GcsTheme.colors
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -301,13 +370,13 @@ fun SettingsRow(label: String, value: String) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = label, fontSize = 12.sp, color = GcsTextSecondary)
+        Text(text = label, fontSize = 12.sp, color = colors.textSecondary)
         Text(
             text = value,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.Monospace,
-            color = GcsTextPrimary
+            color = colors.textPrimary
         )
     }
 }

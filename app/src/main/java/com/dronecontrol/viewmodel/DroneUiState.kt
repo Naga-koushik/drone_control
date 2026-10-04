@@ -22,6 +22,8 @@ data class DroneUiState(
     val isModeSelectorOpen: Boolean = false,
     val targetTakeoffAlt: Double = 10.0,
     val snackbarMessage: String? = null,
+    val isDarkMode: Boolean = true,
+    val isCockpitOpen: Boolean = false,
     // Stick positions (-1.0f to 1.0f)
     val leftStickX: Float = 0f,   // Yaw
     val leftStickY: Float = 0f,   // Throttle

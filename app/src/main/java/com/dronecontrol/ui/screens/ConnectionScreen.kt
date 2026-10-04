@@ -22,7 +22,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bluetooth
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.Terminal
@@ -50,16 +49,7 @@ import androidx.compose.ui.unit.sp
 import com.dronecontrol.data.ConnectionState
 import com.dronecontrol.data.ConnectionType
 import com.dronecontrol.ui.components.SimulationBadge
-import com.dronecontrol.ui.theme.GcsAmber
-import com.dronecontrol.ui.theme.GcsCardBackground
-import com.dronecontrol.ui.theme.GcsCardBorder
-import com.dronecontrol.ui.theme.GcsCrimson
-import com.dronecontrol.ui.theme.GcsCyan
-import com.dronecontrol.ui.theme.GcsDarkBackground
-import com.dronecontrol.ui.theme.GcsEmerald
-import com.dronecontrol.ui.theme.GcsTextMuted
-import com.dronecontrol.ui.theme.GcsTextPrimary
-import com.dronecontrol.ui.theme.GcsTextSecondary
+import com.dronecontrol.ui.theme.GcsTheme
 import com.dronecontrol.viewmodel.DroneUiState
 import com.dronecontrol.viewmodel.DroneViewModel
 
@@ -69,6 +59,7 @@ fun ConnectionScreen(
     viewModel: DroneViewModel,
     modifier: Modifier = Modifier
 ) {
+    val colors = GcsTheme.colors
     val listState = rememberLazyListState()
 
     // Auto-scroll console when new logs arrive
@@ -81,7 +72,7 @@ fun ConnectionScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(GcsDarkBackground)
+            .background(colors.background)
             .padding(16.dp)
     ) {
         // Screen Header
@@ -97,12 +88,12 @@ fun ConnectionScreen(
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
                     letterSpacing = 1.sp,
-                    color = GcsTextPrimary
+                    color = colors.textPrimary
                 )
                 Text(
                     text = "Configure ESP32 bridge or virtual simulation link",
                     fontSize = 12.sp,
-                    color = GcsTextMuted
+                    color = colors.textMuted
                 )
             }
 
@@ -146,10 +137,10 @@ fun ConnectionScreen(
         // Parameter Configuration Card
         Card(
             shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = GcsCardBackground),
+            colors = CardDefaults.cardColors(containerColor = colors.cardBackground),
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, GcsCardBorder, RoundedCornerShape(12.dp))
+                .border(1.dp, colors.cardBorder, RoundedCornerShape(12.dp))
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 // Connection State Status Row
@@ -163,15 +154,15 @@ fun ConnectionScreen(
                         fontSize = 12.sp,
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.SemiBold,
-                        color = GcsTextMuted
+                        color = colors.textMuted
                     )
 
                     val statusColor = when (uiState.connectionState) {
-                        ConnectionState.CONNECTED -> GcsEmerald
-                        ConnectionState.CONNECTING -> GcsAmber
-                        ConnectionState.DISCONNECTING -> GcsAmber
-                        ConnectionState.DISCONNECTED -> GcsTextMuted
-                        ConnectionState.ERROR -> GcsCrimson
+                        ConnectionState.CONNECTED -> colors.success
+                        ConnectionState.CONNECTING -> colors.warning
+                        ConnectionState.DISCONNECTING -> colors.warning
+                        ConnectionState.DISCONNECTED -> colors.textMuted
+                        ConnectionState.ERROR -> colors.error
                     }
                     Text(
                         text = uiState.connectionState.name,
@@ -194,10 +185,10 @@ fun ConnectionScreen(
                             placeholder = { Text("192.168.4.1") },
                             singleLine = true,
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = GcsCyan,
-                                unfocusedBorderColor = GcsCardBorder,
-                                focusedTextColor = GcsTextPrimary,
-                                unfocusedTextColor = GcsTextPrimary
+                                focusedBorderColor = colors.primary,
+                                unfocusedBorderColor = colors.cardBorder,
+                                focusedTextColor = colors.textPrimary,
+                                unfocusedTextColor = colors.textPrimary
                             ),
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -210,10 +201,10 @@ fun ConnectionScreen(
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = GcsCyan,
-                                unfocusedBorderColor = GcsCardBorder,
-                                focusedTextColor = GcsTextPrimary,
-                                unfocusedTextColor = GcsTextPrimary
+                                focusedBorderColor = colors.primary,
+                                unfocusedBorderColor = colors.cardBorder,
+                                focusedTextColor = colors.textPrimary,
+                                unfocusedTextColor = colors.textPrimary
                             ),
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -231,10 +222,10 @@ fun ConnectionScreen(
                             placeholder = { Text("ESP32-MAVLINK-BRIDGE") },
                             singleLine = true,
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = GcsCyan,
-                                unfocusedBorderColor = GcsCardBorder,
-                                focusedTextColor = GcsTextPrimary,
-                                unfocusedTextColor = GcsTextPrimary
+                                focusedBorderColor = colors.primary,
+                                unfocusedBorderColor = colors.cardBorder,
+                                focusedTextColor = colors.textPrimary,
+                                unfocusedTextColor = colors.textPrimary
                             ),
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -248,14 +239,14 @@ fun ConnectionScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFF131D30))
-                            .border(1.dp, GcsCyan.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                            .background(colors.primary.copy(alpha = if (colors.isDark) 0.12f else 0.08f))
+                            .border(1.dp, colors.primary.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
                             .padding(10.dp)
                     ) {
                         Text(
                             text = "Simulator mode engages internal 10Hz aerodynamics, GPS drift, battery curve, and autonomous state machine. No external hardware or network needed.",
                             fontSize = 11.sp,
-                            color = GcsTextSecondary,
+                            color = colors.textSecondary,
                             lineHeight = 15.sp
                         )
                     }
@@ -268,7 +259,7 @@ fun ConnectionScreen(
                 Button(
                     onClick = { viewModel.toggleConnect() },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isConnected) GcsCrimson else GcsEmerald,
+                        containerColor = if (isConnected) colors.error else colors.success,
                         contentColor = Color.White
                     ),
                     shape = RoundedCornerShape(8.dp),
@@ -303,7 +294,7 @@ fun ConnectionScreen(
             Icon(
                 imageVector = Icons.Default.Terminal,
                 contentDescription = null,
-                tint = GcsCyan,
+                tint = colors.primary,
                 modifier = Modifier.size(16.dp)
             )
             Spacer(modifier = Modifier.width(6.dp))
@@ -312,7 +303,7 @@ fun ConnectionScreen(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Monospace,
-                color = GcsTextMuted
+                color = colors.textMuted
             )
         }
 
@@ -321,8 +312,8 @@ fun ConnectionScreen(
                 .fillMaxWidth()
                 .weight(1f)
                 .clip(RoundedCornerShape(8.dp))
-                .background(Color(0xFF070B12))
-                .border(1.dp, GcsCardBorder, RoundedCornerShape(8.dp))
+                .background(if (colors.isDark) Color(0xFF070B14) else Color(0xFFE2E8F0))
+                .border(1.dp, colors.cardBorder, RoundedCornerShape(8.dp))
                 .padding(8.dp)
         ) {
             if (uiState.consoleLogs.isEmpty()) {
@@ -330,17 +321,17 @@ fun ConnectionScreen(
                     text = "Awaiting transport packet traffic...",
                     fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace,
-                    color = GcsTextMuted,
+                    color = colors.textMuted,
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
                 LazyColumn(state = listState) {
                     items(uiState.consoleLogs) { line ->
                         val logColor = when {
-                            line.startsWith("[TX]") -> GcsCyan
-                            line.startsWith("[REPO_ERR]") -> GcsCrimson
-                            line.startsWith("[MAVLINK") -> GcsEmerald
-                            else -> GcsTextSecondary
+                            line.startsWith("[TX]") -> colors.primary
+                            line.startsWith("[REPO_ERR]") -> colors.error
+                            line.startsWith("[MAVLINK") -> colors.success
+                            else -> colors.textSecondary
                         }
                         Text(
                             text = line,
@@ -364,13 +355,14 @@ fun ConnectionTypeOption(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = GcsTheme.colors
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(if (isSelected) GcsCyan.copy(alpha = 0.15f) else GcsCardBackground)
+            .background(if (isSelected) colors.primary.copy(alpha = if (colors.isDark) 0.15f else 0.10f) else colors.cardBackground)
             .border(
                 1.dp,
-                if (isSelected) GcsCyan else GcsCardBorder,
+                if (isSelected) colors.primary else colors.cardBorder,
                 RoundedCornerShape(8.dp)
             )
             .clickable { onClick() }
@@ -381,7 +373,7 @@ fun ConnectionTypeOption(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = if (isSelected) GcsCyan else GcsTextMuted,
+                tint = if (isSelected) colors.primary else colors.textMuted,
                 modifier = Modifier.size(22.dp)
             )
             Spacer(modifier = Modifier.height(4.dp))
@@ -390,7 +382,7 @@ fun ConnectionTypeOption(
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Monospace,
-                color = if (isSelected) GcsCyan else GcsTextPrimary
+                color = if (isSelected) colors.primary else colors.textPrimary
             )
         }
     }
