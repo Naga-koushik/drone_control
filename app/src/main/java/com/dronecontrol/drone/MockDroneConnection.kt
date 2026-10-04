@@ -299,7 +299,8 @@ class MockDroneConnection(
             } else {
                 // Reached home, now land
                 isRtlReturning = false
-                land()
+                currentMode = FlightMode.LAND
+                targetAltitude = 0.0f
             }
         } else {
             // Manual roll/pitch motion

@@ -1,6 +1,6 @@
 package com.dronecontrol.ui.components
 
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -163,7 +163,7 @@ fun StatusHeader(
 @Composable
 fun SimulationBadge(modifier: Modifier = Modifier) {
     val infiniteTransition = rememberInfiniteTransition(label = "sim_pulse")
-    val pulseColor by infiniteTransition.animateColorAsState(
+    val pulseColor by infiniteTransition.animateColor(
         initialValue = GcsAmber,
         targetValue = GcsAmber.copy(alpha = 0.4f),
         animationSpec = infiniteRepeatable(
