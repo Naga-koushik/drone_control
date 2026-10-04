@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">DroneControl</string>
+    <string name="simulation_mode">SIMULATION MODE</string>
+    <string name="dashboard_title">Dashboard</string>
+    <string name="connection_title">Connection</string>
+    <string name="telemetry_title">Telemetry</string>
+    <string name="map_title">Map</string>
+    <string name="settings_title">Settings</string>
+</resources>

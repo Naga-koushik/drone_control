@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="gcs_background">#FF0B0F19</color>
+    <color name="gcs_surface">#FF131B2E</color>
+    <color name="gcs_accent">#FF00E5FF</color>
+</resources>
