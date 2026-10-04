@@ -162,17 +162,75 @@ class DroneViewModel(
     }
 
     fun onLeftJoystickMoved(x: Float, y: Float) {
-        // x: Yaw (-1 left to 1 right)
-        // y: Throttle (-1 down to 1 up)
         _uiState.update { it.copy(leftStickX = x, leftStickY = y) }
         dispatchJoystickInputs()
     }
 
     fun onRightJoystickMoved(x: Float, y: Float) {
-        // x: Roll (-1 left to 1 right)
-        // y: Pitch (-1 back to 1 forward)
         _uiState.update { it.copy(rightStickX = x, rightStickY = y) }
         dispatchJoystickInputs()
+    }
+
+    // Directional Button Handlers (Safe, non-aggressive, auto-stabilizing)
+    fun setClimb(active: Boolean) {
+        val y = if (active) 0.35f else 0.0f
+        _uiState.update { it.copy(leftStickY = y) }
+        dispatchJoystickInputs()
+    }
+
+    fun setDescend(active: Boolean) {
+        val y = if (active) -0.30f else 0.0f
+        _uiState.update { it.copy(leftStickY = y) }
+        dispatchJoystickInputs()
+    }
+
+    fun setTurnLeft(active: Boolean) {
+        val x = if (active) -0.50f else 0.0f
+        _uiState.update { it.copy(leftStickX = x) }
+        dispatchJoystickInputs()
+    }
+
+    fun setTurnRight(active: Boolean) {
+        val x = if (active) 0.50f else 0.0f
+        _uiState.update { it.copy(leftStickX = x) }
+        dispatchJoystickInputs()
+    }
+
+    fun setMoveForward(active: Boolean) {
+        val y = if (active) 0.40f else 0.0f
+        _uiState.update { it.copy(rightStickY = y) }
+        dispatchJoystickInputs()
+    }
+
+    fun setMoveBackward(active: Boolean) {
+        val y = if (active) -0.40f else 0.0f
+        _uiState.update { it.copy(rightStickY = y) }
+        dispatchJoystickInputs()
+    }
+
+    fun setMoveLeft(active: Boolean) {
+        val x = if (active) -0.40f else 0.0f
+        _uiState.update { it.copy(rightStickX = x) }
+        dispatchJoystickInputs()
+    }
+
+    fun setMoveRight(active: Boolean) {
+        val x = if (active) 0.40f else 0.0f
+        _uiState.update { it.copy(rightStickX = x) }
+        dispatchJoystickInputs()
+    }
+
+    fun emergencyBrake() {
+        _uiState.update {
+            it.copy(
+                leftStickX = 0f,
+                leftStickY = 0f,
+                rightStickX = 0f,
+                rightStickY = 0f
+            )
+        }
+        dispatchJoystickInputs()
+        hold()
     }
 
     private fun dispatchJoystickInputs() {

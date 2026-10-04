@@ -23,6 +23,14 @@ import androidx.compose.material.icons.filled.Height
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.RotateLeft
+import androidx.compose.material.icons.filled.RotateRight
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -36,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import com.dronecontrol.ui.components.ArmConfirmationDialog
 import com.dronecontrol.ui.components.ArtificialHorizon
 import com.dronecontrol.ui.components.CompassRose
+import com.dronecontrol.ui.components.DirectionalButtonPad
 import com.dronecontrol.ui.components.FlightActionControls
 import com.dronecontrol.ui.components.ModeSelectorDialog
 import com.dronecontrol.ui.components.StatusHeader
@@ -191,29 +200,55 @@ fun DashboardScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 5. Dual Virtual Analog Joysticks
+            // 5. Tactical Button System: Dual Directional Pads with Auto-Braking Hover
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(10.dp))
                     .background(GcsCardBackground)
                     .border(1.dp, GcsCardBorder, RoundedCornerShape(10.dp))
-                    .padding(vertical = 12.dp, horizontal = 8.dp),
+                    .padding(vertical = 12.dp, horizontal = 4.dp),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Mode 2 Left Stick: Throttle (Vertical) & Yaw (Horizontal)
-                VirtualJoystick(
-                    label = "THROTTLE / YAW",
+                // Left Pad: Safe Altitude (Climb/Descend) & Steering (Yaw Left/Right)
+                DirectionalButtonPad(
+                    title = "ALTITUDE / STEER",
                     accentColor = GcsCyan,
-                    onMoved = { x, y -> viewModel.onLeftJoystickMoved(x, y) }
+                    upLabel = "CLIMB",
+                    upIcon = Icons.Default.ArrowUpward,
+                    downLabel = "DESCEND",
+                    downIcon = Icons.Default.ArrowDownward,
+                    leftLabel = "YAW L",
+                    leftIcon = Icons.Default.RotateLeft,
+                    rightLabel = "YAW R",
+                    rightIcon = Icons.Default.RotateRight,
+                    centerLabel = "HOVER",
+                    onUpPressed = { viewModel.setClimb(it) },
+                    onDownPressed = { viewModel.setDescend(it) },
+                    onLeftPressed = { viewModel.setTurnLeft(it) },
+                    onRightPressed = { viewModel.setTurnRight(it) },
+                    onCenterClick = { viewModel.emergencyBrake() }
                 )
 
-                // Mode 2 Right Stick: Pitch (Vertical) & Roll (Horizontal)
-                VirtualJoystick(
-                    label = "PITCH / ROLL",
+                // Right Pad: Directional Pitch (Forward/Back) & Roll (Left/Right)
+                DirectionalButtonPad(
+                    title = "DIRECTIONAL MOVE",
                     accentColor = GcsEmerald,
-                    onMoved = { x, y -> viewModel.onRightJoystickMoved(x, y) }
+                    upLabel = "FORWARD",
+                    upIcon = Icons.Default.KeyboardArrowUp,
+                    downLabel = "BACK",
+                    downIcon = Icons.Default.KeyboardArrowDown,
+                    leftLabel = "LEFT",
+                    leftIcon = Icons.Default.KeyboardArrowLeft,
+                    rightLabel = "RIGHT",
+                    rightIcon = Icons.Default.KeyboardArrowRight,
+                    centerLabel = "BRAKE",
+                    onUpPressed = { viewModel.setMoveForward(it) },
+                    onDownPressed = { viewModel.setMoveBackward(it) },
+                    onLeftPressed = { viewModel.setMoveLeft(it) },
+                    onRightPressed = { viewModel.setMoveRight(it) },
+                    onCenterClick = { viewModel.emergencyBrake() }
                 )
             }
         }

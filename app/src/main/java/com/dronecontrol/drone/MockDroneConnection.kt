@@ -270,9 +270,14 @@ class MockDroneConnection(
                 }
             }
             else -> {
-                // Manual throttle control: stick center (0.0) holds alt, positive climbs, negative descends
-                currentVerticalSpeed = manualThrottleInput * 3.0f // max 3 m/s climb/descent
-                currentRelAlt = (currentRelAlt + currentVerticalSpeed * dt).coerceAtLeast(0.0f)
+                // Safe, controlled throttle rate (smooth climb ~1.2 m/s, gentle descent ~0.8 m/s)
+                val targetVertSpeed = when {
+                    manualThrottleInput > 0f -> manualThrottleInput * 1.5f
+                    manualThrottleInput < 0f -> manualThrottleInput * 1.0f
+                    else -> 0.0f
+                }
+                currentVerticalSpeed += (targetVertSpeed - currentVerticalSpeed) * (dt * 8.0f)
+                currentRelAlt = (currentRelAlt + currentVerticalSpeed * dt).coerceIn(0.0f, 120.0f)
             }
         }
         currentAlt = homeAlt + currentRelAlt
@@ -286,9 +291,9 @@ class MockDroneConnection(
 
             if (dist > 2.0) {
                 val bearing = atan2(dLon, dLat)
-                val targetSpeed = 5.0f // 5 m/s RTL transit speed
+                val targetSpeed = 4.0f // 4 m/s safe RTL transit speed
                 currentGroundSpeed = targetSpeed
-                currentPitch = 12.0f // Nose down forward flight
+                currentPitch = 8.0f // Gentle nose down forward flight
                 currentRoll = 0.0f
 
                 // Move coordinates towards home
@@ -303,22 +308,26 @@ class MockDroneConnection(
                 targetAltitude = 0.0f
             }
         } else {
-            // Manual roll/pitch motion
-            currentRoll = manualRollInput * 25.0f // up to 25 deg bank angle
-            currentPitch = manualPitchInput * 25.0f // up to 25 deg pitch angle
+            // Safe self-leveling attitude: bank angle limited to 12° for rock-solid stability
+            val targetRoll = manualRollInput * 12.0f
+            val targetPitch = manualPitchInput * 12.0f
+            currentRoll += (targetRoll - currentRoll) * (dt * 8.0f)
+            currentPitch += (targetPitch - currentPitch) * (dt * 8.0f)
 
-            val horizontalSpeed = sqrt(manualRollInput * manualRollInput + manualPitchInput * manualPitchInput) * 8.0f
-            currentGroundSpeed = horizontalSpeed
+            // Safe horizontal velocity (max 3.0 m/s) with active auto-braking when buttons released
+            val targetSpeed = sqrt(manualRollInput * manualRollInput + manualPitchInput * manualPitchInput) * 3.0f
+            currentGroundSpeed += (targetSpeed - currentGroundSpeed) * (dt * 6.0f)
 
-            if (horizontalSpeed > 0.1f) {
-                // Direction of movement relative to drone heading and joystick
+            if (currentGroundSpeed > 0.05f) {
                 val stickAngle = atan2(manualRollInput.toDouble(), manualPitchInput.toDouble())
                 val moveHeadingRad = (currentHeading * PI / 180.0) + stickAngle
                 val metersPerDegLat = 111132.95
                 val metersPerDegLon = 111132.95 * cos(currentLat * PI / 180.0)
 
-                currentLat += (horizontalSpeed * cos(moveHeadingRad) * dt) / metersPerDegLat
-                currentLon += (horizontalSpeed * sin(moveHeadingRad) * dt) / metersPerDegLon
+                currentLat += (currentGroundSpeed * cos(moveHeadingRad) * dt) / metersPerDegLat
+                currentLon += (currentGroundSpeed * sin(moveHeadingRad) * dt) / metersPerDegLon
+            } else {
+                currentGroundSpeed = 0.0f
             }
         }
     }
